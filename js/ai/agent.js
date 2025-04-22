@@ -14,22 +14,39 @@ export class Agent {
     this.idleFrames = 0;
 
     this.score = 0;
+
+    // Store last controls
+    this.lastInputs = null;
+    this.lastOutputs = null;
+    this.control = { jump: false, left: false, right: false };
   }
 
+  // Decide controls for this frame
+  think(platforms, gameSize) {
+    if (!this.alive) return;
+    const inputs = generateGameStateInputs(this.player, platforms, gameSize);
+    const outputs = this.genome.process(inputs);
+    this.lastInputs = inputs;
+    this.lastOutputs = outputs;
+    this.control = {
+      jump: outputs[0] > 0.5,
+      left: outputs[1] > 0.5,
+      right: outputs[2] > 0.5
+    };
+  }
+
+  // Only apply physics and movement using last-decided controls
   update(deltaTime, platforms, gameSize) {
     if (!this.alive) return;
 
-    const inputs = generateGameStateInputs(this.player, platforms, gameSize);
-    const outputs = this.genome.process(inputs);
-
-    // Apply outputs
-    if (outputs[0] > 0.5 && this.player.isOnGround) {
+    // Apply last-decided controls
+    if (this.control.jump && this.player.isOnGround) {
       this.player.velocityY = -400;
     }
-    if (outputs[1] > 0.5) {
+    if (this.control.left) {
       this.player.velocityX = -200;
     }
-    if (outputs[2] > 0.5) {
+    if (this.control.right) {
       this.player.velocityX = 200;
     }
 
@@ -88,10 +105,6 @@ export class Agent {
       this.alive = false;
       this.calculateFitness();
     }
-
-    this.lastInputs = inputs;
-    this.lastOutputs = outputs;
-
   }
 
   calculateFitness() {

@@ -20,6 +20,11 @@ export class Population {
     }
   }
 
+  // Call this ONCE per frame, before sub-stepping
+  thinkAll() {
+    this.agents.forEach(agent => agent.think(this.platforms, this.gameSize));
+  }
+
   update(deltaTime) {
     // Scroll platforms
     const SCROLL_SPEED = 150;
@@ -28,16 +33,18 @@ export class Population {
     // Generate new platforms dynamically
     const lastPlatform = this.platforms[this.platforms.length - 1];
     if (lastPlatform.x + lastPlatform.width < this.gameSize.width) {
-      const gap = 150;
-      const width = 150;
-      const newY = lastPlatform.y;
+      // Add variation in gap, width, and Y position
+      const gap = Math.floor(Math.random() * 101) + 100; // 100-200
+      const width = Math.floor(Math.random() * 101) + 100; // 100-200
+      const heightOffset = Math.floor(Math.random() * 61) - 30; // -30 to +30
+      const newY = Math.min(Math.max(lastPlatform.y + heightOffset, 200), this.gameSize.height - 50);
       this.platforms.push({ x: lastPlatform.x + lastPlatform.width + gap, y: newY, width, height: 20 });
     }
 
     // Remove off-screen platforms
     this.platforms = this.platforms.filter(p => p.x + p.width > 0);
 
-    // Update all agents
+    // Update all agents (physics only)
     this.agents.forEach(agent => agent.update(deltaTime, this.platforms, this.gameSize));
 
     if (this.agents.every(agent => !agent.alive)) {
@@ -51,25 +58,27 @@ export class Population {
     const bestFitness = this.agents[0].score;
     recordFitness(bestFitness);
 
-    const eliteCount = Math.floor(GA_CONFIG.populationSize * 0.1);
-    const elites = this.agents.slice(0, eliteCount);
-
-    const survivors = this.agents.slice(0, GA_CONFIG.populationSize / 2);
-
-    const newAgents = [...elites];
-
-    while (newAgents.length < GA_CONFIG.populationSize) {
-      const parentA = this.selectParent(survivors);
-      const parentB = this.selectParent(survivors);
-
-      let childGenome = parentA.genome.crossover(parentB.genome);
-      childGenome.mutate();
-
-      const child = new Agent(this.gameSize);
-      child.genome = childGenome;
-      newAgents.push(child);
+    let newAgents;
+    if (window.forceRandomPopulation) {
+      newAgents = [];
+      for (let i = 0; i < GA_CONFIG.populationSize; i++) {
+        newAgents.push(new Agent(this.gameSize));
+      }
+    } else {
+      const eliteCount = Math.floor(GA_CONFIG.populationSize * 0.1);
+      const elites = this.agents.slice(0, eliteCount);
+      const survivors = this.agents.slice(0, GA_CONFIG.populationSize / 2);
+      newAgents = [...elites];
+      while (newAgents.length < GA_CONFIG.populationSize) {
+        const parentA = this.selectParent(survivors);
+        const parentB = this.selectParent(survivors);
+        let childGenome = parentA.genome.crossover(parentB.genome);
+        childGenome.mutate();
+        const child = new Agent(this.gameSize);
+        child.genome = childGenome;
+        newAgents.push(child);
+      }
     }
-
     this.agents = newAgents;
     this.platforms = generateInitialPlatforms(this.gameSize);
     this.generation++;

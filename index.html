@@ -7,25 +7,55 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <!-- Top Section: Game + NN + Stats -->
-<div id="top-container">
-    <canvas id="gameCanvas" width="800" height="600"></canvas>
-    <canvas id="nnCanvas" width="400" height="600"></canvas>
-
-    <div id="aiStats">
-        <strong>AI Simulation Mode</strong><br>
-        Press <b>F</b> to toggle Fast-Forward<br><br>
+    <header>
+        <h1>Infinite Platformer AI</h1>
+    </header>
+    <button id="settings-toggle" class="settings-toggle" title="Show/Hide Settings">⚙️</button>
+    <div id="settings-panel" class="floating-panel hidden">
+        <h2>Neural Net Settings</h2>
+        <label for="hidden1">Hidden Layer 1 Neurons: <span id="hidden1Value">6</span></label>
+        <input type="range" id="hidden1" min="1" max="20" value="6">
+        <label for="hidden2">Hidden Layer 2 Neurons: <span id="hidden2Value">0</span></label>
+        <input type="range" id="hidden2" min="0" max="20" value="0">
+        <label for="hidden3">Hidden Layer 3 Neurons: <span id="hidden3Value">0</span></label>
+        <input type="range" id="hidden3" min="0" max="20" value="0">
+        <label for="squareCount">Square Count: <span id="squareCountValue">50</span></label>
+        <input type="range" id="squareCount" min="10" max="200" value="50">
+        <label for="mutationRate">Mutation Rate: <span id="mutationRateValue">0.1</span></label>
+        <input type="range" id="mutationRate" min="0.01" max="0.5" step="0.01" value="0.1">
+        <label for="mutationStrength">Mutation Strength: <span id="mutationStrengthValue">0.5</span></label>
+        <input type="range" id="mutationStrength" min="0.1" max="5.0" step="0.1" value="0.5">
+        <label for="weightRange">Initial Weight Range: <span id="weightRangeValue">1.0</span></label>
+        <input type="range" id="weightRange" min="0.5" max="5.0" step="0.1" value="1.0">
+        <label for="ffSpeed">Fast Forward Speed: <span id="ffSpeedValue">5</span>x</label>
+        <input type="range" id="ffSpeed" min="2" max="20" value="5">
+        <button id="applySettings">Apply & Restart</button>
+        <button id="resetGenome" style="margin-top:6px;">Reset Genome</button>
     </div>
-</div>
-
-<canvas id="fitnessCanvas" width="1240" height="200"></canvas>
-
-
+    <main>
+        <section id="top-container" class="flex-row">
+            <div class="canvas-group">
+                <div class="game-canvas-wrapper" style="position: relative; display: inline-block;">
+                    <canvas id="gameCanvas" width="800" height="600"></canvas>
+                    <div class="ai-overlay-controls overlay-top-right">
+                        <button id="fastForwardBtn" title="Toggle Fast Forward">⏩ Fast Forward</button>
+                        <button id="resetGenomeBtn" title="Reset Genome">🔄 Reset Genome</button>
+                    </div>
+                </div>
+                <div class="nn-visualizer-container">
+                    <div class="nn-visualizer-title">Neural Network Visualization</div>
+                    <canvas id="nnCanvas" width="400" height="600"></canvas>
+                </div>
+            </div>
+        </section>
+        <section id="fitness-section">
+            <canvas id="fitnessCanvas" width="1240" height="200"></canvas>
+        </section>
+    </main>
+    <footer>
+        <span>Made with ❤️ for AI Platformer Experiments</span>
+    </footer>
     <script type="module" src="js/main.js"></script>
 </body>
-
-
-
-
 </html>
 

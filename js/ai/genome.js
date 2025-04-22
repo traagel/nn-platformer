@@ -3,27 +3,36 @@ import { GA_CONFIG } from './gaConfig.js';
 export class Genome {
   constructor() {
     this.inputSize = GA_CONFIG.inputNeurons;
-    this.hiddenSize = GA_CONFIG.hiddenNeurons;
+    this.hiddenLayers = [...GA_CONFIG.hiddenLayers]; // Array of hidden layer sizes
     this.outputSize = GA_CONFIG.outputNeurons;
 
-    // Initialize weights randomly (-1 to 1)
-    this.weightsInputHidden = this.randomMatrix(this.inputSize, this.hiddenSize);
-    this.weightsHiddenOutput = this.randomMatrix(this.hiddenSize, this.outputSize);
+    // Initialize weights for each layer
+    this.weights = [];
+    let prevSize = this.inputSize;
+    for (let i = 0; i < this.hiddenLayers.length; i++) {
+      this.weights.push(this.randomMatrix(prevSize, this.hiddenLayers[i]));
+      prevSize = this.hiddenLayers[i];
+    }
+    // Output layer
+    this.weights.push(this.randomMatrix(prevSize, this.outputSize));
 
     this.fitness = 0;
   }
 
   randomMatrix(rows, cols) {
+    const range = GA_CONFIG.weightRange || 1.0;
     return Array.from({ length: rows }, () =>
-      Array.from({ length: cols }, () => Math.random() * 2 - 1)
+      Array.from({ length: cols }, () => Math.random() * 2 * range - range)
     );
   }
 
   // Forward pass: inputs → outputs
   process(inputs) {
-    const hidden = this.activate(this.dot(inputs, this.weightsInputHidden));
-    const outputs = this.activate(this.dot(hidden, this.weightsHiddenOutput));
-    return outputs;
+    let layerInput = inputs;
+    for (let i = 0; i < this.weights.length; i++) {
+      layerInput = this.activate(this.dot(layerInput, this.weights[i]));
+    }
+    return layerInput;
   }
 
   // Simple dot product
@@ -41,31 +50,26 @@ export class Genome {
   // Clone genome
   clone() {
     const clone = new Genome();
-    clone.weightsInputHidden = JSON.parse(JSON.stringify(this.weightsInputHidden));
-    clone.weightsHiddenOutput = JSON.parse(JSON.stringify(this.weightsHiddenOutput));
+    clone.weights = this.weights.map(w => JSON.parse(JSON.stringify(w)));
     return clone;
   }
 
   // Mutate weights
   mutate() {
-    const mutateValue = (w) => (Math.random() < GA_CONFIG.mutationRate ? w + (Math.random() * 2 - 1) * 0.5 : w);
-
-    this.weightsInputHidden = this.weightsInputHidden.map(row => row.map(mutateValue));
-    this.weightsHiddenOutput = this.weightsHiddenOutput.map(row => row.map(mutateValue));
+    const rate = GA_CONFIG.mutationRate || 0.1;
+    const strength = GA_CONFIG.mutationStrength || 0.5;
+    const mutateValue = (w) => (Math.random() < rate ? w + (Math.random() * 2 * strength - strength) : w);
+    this.weights = this.weights.map(matrix => matrix.map(row => row.map(mutateValue)));
   }
 
   // Crossover (simple averaging)
   crossover(partner) {
     const child = new Genome();
-
-    child.weightsInputHidden = this.weightsInputHidden.map((row, i) =>
-      row.map((w, j) => (w + partner.weightsInputHidden[i][j]) / 2)
+    child.weights = this.weights.map((matrix, l) =>
+      matrix.map((row, i) =>
+        row.map((w, j) => (w + partner.weights[l][i][j]) / 2)
+      )
     );
-
-    child.weightsHiddenOutput = this.weightsHiddenOutput.map((row, i) =>
-      row.map((w, j) => (w + partner.weightsHiddenOutput[i][j]) / 2)
-    );
-
     return child;
   }
 }

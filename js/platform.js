@@ -67,10 +67,9 @@ export function generateInitialPlatforms(game) {
   // Pre-generate a few platforms ahead
   let lastPlatform = platforms[0];
   for (let i = 0; i < 5; i++) {
-    const gap = 150;
-    const width = 150;
-    const heightOffset = 0;
-
+    const gap = Math.floor(Math.random() * 101) + 100; // 100-200
+    const width = Math.floor(Math.random() * 101) + 100; // 100-200
+    const heightOffset = Math.floor(Math.random() * 61) - 30; // -30 to +30
     const newPlatformY = Math.min(Math.max(lastPlatform.y + heightOffset, 200), game.height - 50);
     platforms.push({
       x: lastPlatform.x + lastPlatform.width + gap,
@@ -78,7 +77,6 @@ export function generateInitialPlatforms(game) {
       width: width,
       height: 20
     });
-
     lastPlatform = platforms[platforms.length - 1];
   }
 
