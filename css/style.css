@@ -1,0 +1,41 @@
+/* General body styling */
+body {
+    margin: 20px;
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;   /* Light background for contrast */
+}
+
+/* Flex container for top section */
+#top-container {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    flex-wrap: nowrap;
+}
+
+/* Style for all canvases */
+canvas {
+    border: 1px solid #ccc;
+    background-color: #fff;   /* White background for clear visuals */
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+}
+
+/* Stats box */
+#aiStats {
+    background: rgba(255, 255, 255, 0.9);
+    padding: 15px;
+    min-width: 220px;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    line-height: 1.6;
+}
+
+/* Fitness graph styling */
+#fitnessCanvas {
+    display: block;
+    margin: 30px auto 0 auto;   /* Center the graph */
+    border: 1px solid #ccc;
+    background-color: #fff;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+}
+
